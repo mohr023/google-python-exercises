@@ -39,6 +39,64 @@ print_words() and print_top().
 
 import sys
 
+""""
+def print_words(filename):
+    words_count = sorted(list(word_count_dict(filename).items()))
+    for word, count in words_count:
+        print('%s %s' % (word, count))
+
+
+def print_top(filename):
+    words_count = list(word_count_dict(filename).items())
+    words_count.sort(key=lambda word_count: word_count[1], reverse=True)
+    for word, _ in words_count:
+        print('%s' % word)
+
+
+def word_count_dict(filename):
+    words_dict = {}
+    with open(filename) as input_file:
+        for line in input_file:
+            for word in line.split():
+                word = word.lower()
+
+                if words_dict.get(word) is None:
+                    words_dict[word] = 1
+                else:
+                    words_dict[word] += 1
+
+    return words_dict
+"""
+
+
+def count_words(filename):
+    with open(filename, 'r') as f:
+        count = {}
+        for line in f:
+            words = line.split()
+            for word in words:
+                if count.get(word) is None:
+                    count[word] = 1
+                else:
+                    count[word] += 1
+
+        return count
+
+
+def print_words(filename):
+    words = count_words(filename)
+    for k, v in sorted(words.items()):
+        print('%s: %d' % (k, v))
+
+
+def print_top(filename):
+    words = count_words(filename)
+    i = 0
+    for k, v in sorted(words.items(), key=lambda x: x[1], reverse=True):
+        print('%s: %d' % (k, v))
+        i += 1
+        if i >= 20:
+            break
 
 # +++your code here+++
 # Define print_words(filename) and print_top(filename) functions.

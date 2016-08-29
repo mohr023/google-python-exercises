@@ -1,4 +1,4 @@
-#!/usr/bin/python
+ #!/usr/bin/python
 # Copyright 2010 Google Inc.
 # Licensed under the Apache License, Version 2.0
 # http://www.apache.org/licenses/LICENSE-2.0
@@ -34,6 +34,19 @@ Suggested milestones for incremental development:
  -Fix main() to use the extract_names list
 """
 
+import re
+
+
+def find_names_and_rank(line):
+    result = re.search(r'(<td>\d+</td>)(<td>\w+</td>)+', line)
+    names_and_rank = []
+    if result is not None:
+        result = result.group().replace('<td>', '').split('</td>')[:-1]
+        for s in result[1:]:
+            names_and_rank.append((s, result[0]))
+
+    return names_and_rank
+
 
 def extract_names(filename):
     """
@@ -41,8 +54,30 @@ def extract_names(filename):
     followed by the name-rank strings in alphabetical order.
     ['2006', 'Aaliyah 91', Aaron 57', 'Abagail 895', ' ...]
     """
-    # +++your code here+++
-    return
+    retorno = []
+    year = None
+    with open(filename) as input_file:
+        for line in input_file:
+            match = find_year(line)
+            if match:
+                year = match
+            else:
+                name_rank = find_names_and_rank(line)
+                if name_rank:
+                    retorno += name_rank
+
+    retorno.sort()
+    retorno.insert(0, year)
+    return retorno
+
+
+def find_year(line):
+    result = re.search(r'>Popularity in \d+', line)
+    year = None
+    if result is not None:
+        year = result.group().split()[-1]
+
+    return year
 
 
 def main():
@@ -52,8 +87,7 @@ def main():
     args = sys.argv[1:]
 
     if not args:
-        print('usage: [--summaryfile] file [file ...]')
-        sys.exit(1)
+        error()
 
     # Notice the summary flag and remove it from args if it is present.
     summary = False
@@ -61,10 +95,26 @@ def main():
         summary = True
         del args[0]
 
-        # +++your code here+++
-        # For each filename, get the names, then either print the text output
-        # or write it to a summary file
+    if args[0] == 'file':
+        del args[0]
+    else:
+        error()
+
+    for arg in args:
+        names_and_ranks = extract_names(arg)
+
+        if summary:
+            with open('summary-'+arg, 'w') as summary_file:
+                summary_file.write(str(names_and_ranks))
+        else:
+            print(names_and_ranks)
+    # For each filename, get the names, then either print the text output
+    # or write it to a summary file
 
 
 if __name__ == '__main__':
     main()
+
+def error():
+    print('usage: [--summaryfile] file [file ...]')
+    sys.exit(1)
